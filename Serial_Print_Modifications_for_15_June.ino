@@ -55,7 +55,6 @@ int highestReading() {
     }
   }
   return latestHighestReading;
-
 }
 
 //print only even numbers from array
