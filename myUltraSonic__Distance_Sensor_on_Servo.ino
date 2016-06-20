@@ -1,13 +1,32 @@
+/*
+*Heather's working code.
+*
+*20 June 2016: initial upload 
+*20 June 2016: in class edits based on mShiloh's additions to the code
+*/
+
+//include the servo library
 #include <Servo.h>
 
-//Global array of measurements
-long measurements [180];
-long averages [18];
+// add restrictions to the rotational distance that the servo turns
+// keeps from breaking the servo at the extremes of it's range
+// please chose multiples of ten or -ms
+// the program may not work -ms
+#define MIN_SERVO_VALUE 30
+#define MAX_SERVO_VALUE 160
+#define SERVO_RANGE (MAX_SERVO_VALUE - MIN_SERVO_VALUE)
 
-//the ultrasonic distance measuring sensor that sits on top of this servo
+
+//Global array of measurements
+// These must be the full range -ms
+// since index is absolute degree and not relative degree -ms
+long measurements [180];
+long averages [180 / 10];
+
+//the ultrasonic distance measuring sensor that sits on top of this servo -ms
 Servo myServo;
 const int servoPin = 9;
-int pos = 0; //vairiable to store the servo position
+int pos = 0; //vairiable to store the servo position -ms does not have this anymore; is this necessary?
 
 // ultrasonic distance measuring sensor
 const int trigPin = 12;
@@ -44,9 +63,9 @@ void setup() {
   pinMode( in3, OUTPUT);
   pinMode( in4, OUTPUT);
 
-//Later on, Move These 2 to loop()
+//Later on, Move These 2 functions to loop()
   //look around and see what's nearby
-  sweepAndMeasure();
+  void sweepAndMeasure();
 
   //look at measurments in 10 degree chunks
   averageInTenDegreeChunks ();
@@ -71,7 +90,7 @@ void loop () {
 //sweep 180 degrees and populate the measurements array
 void sweepAndMeasure() {
   Serial.println ("Hello from sweepAndMeasure()");
-  for (int degree = 0; degree < 180; degree ++) {
+  for (int degree = MIN_SERVO_VALUE; degree < MAX_SERVO_VALUE; degree++){
     myServo.write (degree);
     delay (15);
     measurements [degree] = measureDistance();
@@ -80,8 +99,8 @@ void sweepAndMeasure() {
 
 void averageInTenDegreeChunks () {
   Serial.println ("Hello from averageInTenDegreeChunks");
-  for (int degree = 0; degree < 180; degree = degree + 10) {
-   averages[degree/10] = averageTheseTen (degree);
+  for (int degree = MIN_SERVO_VALUE; degree < MAX_SERVO_VALUE; degree = degree + 10) {
+   averages [degree / 10] = averageTheseTen (degree);
   }
   
 }
@@ -95,7 +114,7 @@ int averageTheseTen (int startHere) {
     Serial.print (measurements[degree]);
     Serial.print ("\t");
     if (-1 == measurements[degree] ) {
-      //skip thid measurement
+      //skip this measurement
       validMeasurements --;
     } else {
     sum = sum + measurements [degree];
@@ -106,7 +125,7 @@ int averageTheseTen (int startHere) {
   Serial.print ("average: ");
   Serial.print (average);
   Serial.print ("\t");
-  Serial.print ("Valid Measurements: ");
+  Serial.print ("# of Valid Measurements: ");
   Serial.print (validMeasurements);
   Serial.println ("");
   
@@ -118,7 +137,7 @@ int averageTheseTen (int startHere) {
 // no error checking takes place
 
 long measureDistance() {
-  Serial.println ("Hello from measureDistance()");
+  Serial.println ("Hello from measureDistance()\t");
   
   long duration, distance;
 
@@ -131,12 +150,12 @@ long measureDistance() {
   digitalWrite(trigPin, LOW);
   duration = pulseIn(echoPin, HIGH); // measure the time to the echo
   distance = (duration / 2) / 29.1; // calculate the distance in cm
-  return distance;
 
   //if reading is out of range, make it -1
   if (distance <= 0 || distance >= 200) {
     distance = -1;
   }
+   return distance;
   
 }
 
