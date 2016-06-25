@@ -3,6 +3,7 @@
 *
 *20 June 2016: initial upload 
 *20 June 2016: in class edits based on mShiloh's additions to the code
+*25 June 2016: edits to try to make the robot actually do something in response to the data
 */
 
 //include the servo library
@@ -76,8 +77,56 @@ void loop () {
 
 
 
-  //finally decide where to go 
-  
+  //finally decide where to go  
+  //exampe from Obstacle Avoidance Robot, need to modify to use sweepAndMeasure() and averageInTenDegreeChunks()
+
+  long distance;
+  distance = measureDistance ();
+  Serial.print (distance);
+  Serial.println ("cm");
+
+  // check validity of distance
+  if (distance >= 200 || distance <= 0) {
+    Serial.println("invalid values; heading into the unknown");
+    goForward (500);
+    stopRobot (300);
+  }
+
+  else  {
+    if (distance < minimumDistance) {
+      //turn left, take measurement
+      //turn right, take measurement
+      //go towards greater distance
+
+      turnLeft (100);
+      int leftDistance = measureDistance();
+      turnRight (200);
+      int rightDistance = measureDistance();
+      turnLeft (100); //return to forward position
+
+      if (leftDistance >= 200
+          || leftDistance <= 0
+          || rightDistance >= 200
+          || rightDistance <= 0)
+      {
+        Serial.println ("Either Left or Right reading is bad");
+
+      }
+      else if (leftDistance > rightDistance) {
+        turnLeft (100);
+      }
+      else {
+        turnRight (100);
+      }
+    } //end of case for distance less than minimumDistance
+
+    //begin case for valid range with distance greater than minimumDistance
+    else  {
+      Serial.println ("distance in acceptable range");
+      goForward (500);
+    }
+  } //end valid range case
+} //end loop
   
   
 }
